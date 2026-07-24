@@ -1,17 +1,33 @@
 #include "Engine.h"
 #include <glad/glad.h>
 
+
 Engine::Engine()
-	: m_Window(Core::Window::Desc{})
+	: m_Window(Core::Window::Desc{}), m_RenderSystem(m_Window)
 {
 	m_LastTime = std::chrono::steady_clock::now();
 
 	m_NPCBlackboard = Game::NPC::NPCBlackboard{};
-	m_NPCs.resize(64);
+	
+    m_NPCs.resize(64);
+
+    //m_Lua.LoadScript("scripts/npc.lua");
+    //RegisterNPCBindings(m_Lua.State());
 
 	for (auto& npc : m_NPCs)
 		npc.tuning = &m_NPCBlackboard;
 }
+
+
+void Engine::Render()
+{
+    m_RenderSystem.BeginFrame();
+
+
+
+    m_RenderSystem.EndFrame();
+}
+
 
 void Engine::Run()
 {
@@ -49,7 +65,15 @@ void Engine::Run()
 
 void Engine::Update(float dt)
 {
+        // Camera consumes commands
     CameraSystem::Update(m_Camera, m_Commands, dt);
 
-    Game::NPC::NPCSystem::Update(std::span<Game::NPC::NPCComponent>(m_NPCs),m_Camera.position, dt);
+        // NPCs updated in parallel
+    auto span = std::span<Game::NPC::NPCComponent>(m_NPCs);
+    std::uint32_t count = static_cast<std::uint32_t>(span.size());
+
+    m_JobSystem.ParallelFor(count, [&](std::uint32_t i)
+    {
+        Game::NPC::NPCSystem::UpdateSingle(span[i], m_Camera.position, dt);
+    });
 }

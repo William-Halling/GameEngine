@@ -5,27 +5,56 @@
 
 namespace Gameplay
 {
-	struct MoveCommand
+	template<typename T, size_t Capacity>
+	struct RingBuffer
 	{
-		glm::vec3 dir{};
+		T data[Capacity];
+		size_t head = 0;
+
+		void clear() 
+		{ 
+			head = 0; 
+		}
+
+		void push(const T& cmd)
+		{
+			data[head % Capacity] = cmd;
+
+			head++;
+		}
+
+		size_t size() const 
+		{ 
+			return head;
+		}
+
+		const T& operator[](size_t i) const
+		{
+			return data[i];
+		}
 	};
 
-	struct LookCommand
-	{
-		float yawDelta = 0.0f;
-		float pitchDelta = 0.0f;
+	struct MoveCommand 
+	{ 
+		glm::vec3 dir; 
+	};
+
+	struct LookCommand 
+	{ 
+		float yawDelta, pitchDelta; 
 	};
 
 	class CommandBuffer
 	{
 	public:
+
+		RingBuffer<MoveCommand, 256> moves;
+		RingBuffer<LookCommand, 256> looks;
+
 		void clear() noexcept
 		{
 			moves.clear();
 			looks.clear();
 		}
-
-		std::vector<MoveCommand> moves;
-		std::vector<LookCommand> looks;
 	};
 }
