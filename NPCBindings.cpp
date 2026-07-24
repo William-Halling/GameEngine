@@ -22,11 +22,13 @@ namespace Game::NPC::Bindings
 		return 0;
 	}
 
-
-	void Register(lua_State* L)
+	namespace Bindings
 	{
-		lua_register(L, "NPC_GetPosition", Lua_NPC_GetPosition);
+		void Register(lua_State* L)
+		{
+			lua_register(L, "NPC_GetPosition", Lua_NPC_GetPosition);
 
-		lua_register(L, "NPC_SetState", Lua_NPC_SetState);
+			lua_register(L, "NPC_SetState", Lua_NPC_SetState);
+		}
 	}
 }

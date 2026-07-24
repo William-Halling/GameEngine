@@ -1,13 +1,14 @@
 #pragma once
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/norm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 
 #include "Input.h"
 #include "CommandBuffer.hpp"
 
 
-struct alignas(16) CameraData
+struct alignas(64) CameraData
 {
     glm::vec3 position{ 0.0f, 1.6f, 5.0f };
     float _pad0 = 0.0f;
@@ -24,9 +25,10 @@ struct alignas(16) CameraData
     glm::vec3 worldUp{ 0.0f, 1.0f, 0.0f };
     float     movementSpeed = 6.0f;
 
-    float     mouseSensitivity = 0.08f;
-    float     _pad1[3] = {};
+    float mouseSensitivity = 0.08f;
+    float _pad1[3] = {};
 };
+
 
 namespace Camera
 {
@@ -42,7 +44,7 @@ namespace Camera
         c.front = glm::normalize(front);
 
         c.right = glm::normalize(glm::cross(c.front, c.worldUp));
-        c.up = glm::normalize(glm::cross(c.right, c.front));
+        c.up    = glm::normalize(glm::cross(c.right, c.front));
     }
 
     [[nodiscard]] inline glm::mat4 View(const CameraData& c) noexcept
@@ -69,24 +71,35 @@ namespace Camera
     }
 }
 
+
 class CameraSystem
 {
 public:
-    static inline void Update(CameraData& cam, const InputBuffers& input, float dt) noexcept
+    static inline void Update(CameraData& cam, const Gameplay::CommandBuffer& commands, float dt) noexcept
     {
+            // 1. Apply look commands
+        for (size_t i = 0; i < commands.looks.size(); ++i)
+        {
+            const auto& l = commands.looks[i];
+            Camera::AddYawPitch(cam, l.yawDelta, l.pitchDelta);
+        }
+
+            // 2. Build movement direction in camera space
         glm::vec3 moveDir{ 0.0f };
 
-        glm::vec3 moveDir{ 0.0f };
+        for (size_t i = 0; i < commands.moves.size(); ++i)
+        {
+            const auto& m = commands.moves[i];
 
-        for (const auto& m : commands.moves)
-            moveDir += m.dir;
+            moveDir += cam.front * m.dir.z; // forward/back
+            moveDir += cam.right * m.dir.x; // strafe
+            moveDir += cam.worldUp * m.dir.y; // vertical
+        }
 
         if (glm::length2(moveDir) > 0.0f)
             moveDir = glm::normalize(moveDir);
 
+            // 3. Apply movement
         Camera::Move(cam, moveDir, dt);
-
-        for (const auto& l : commands.looks)
-            Camera::AddYawPitch(cam, l.yawDelta, l.pitchDelta);
     }
 };

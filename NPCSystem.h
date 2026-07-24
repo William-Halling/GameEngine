@@ -2,6 +2,9 @@
 #include <span>
 #include <cstdint>
 #include <glm/glm.hpp>
+#include <lua.hpp>
+
+#include "NPC_SOA.hpp"
 
 namespace Game::NPC
 {
@@ -37,13 +40,15 @@ namespace Game::NPC
     class NPCSystem
     {
         public:
-            static void Update(std::span<NPCComponent> npcs, const glm::vec3& playerPos, float dt) noexcept;
-            static NPCState EvaluateState(const NPCComponent& npc, const glm::vec3& playerPos) noexcept;
+            static void Update(NPC_SOA& npc, const glm::vec3& playerPos, float dt) noexcept;
+            static void UpdateSingle(NPCComponent& npc, const glm::vec3& playerPos, float dt);
 
-            static void UpdateIdle(NPCComponent& npc, const glm::vec3& playerPos, float dt) noexcept;
-            static void UpdateWander(NPCComponent& npc, const glm::vec3& playerPos, float dt)  noexcept;
-            static void UpdateChase(NPCComponent& npc, const glm::vec3& playerPos, float dt)  noexcept;
-            static void UpdateAttack(NPCComponent& npc, const glm::vec3& playerPos, float dt)  noexcept;
+            static NPCState EvaluateState(const NPCComponent& npc, const glm::vec3& playerPos)  noexcept;
+
+            static void UpdateIdle(NPCComponent& npc, const glm::vec3& playerPos, float dt)     noexcept;
+            static void UpdateWander(NPCComponent& npc, const glm::vec3& playerPos, float dt)   noexcept;
+            static void UpdateChase(NPCComponent& npc, const glm::vec3& playerPos, float dt)    noexcept;
+            static void UpdateAttack(NPCComponent& npc, const glm::vec3& playerPos, float dt)   noexcept;
             static float DistanceSq(const glm::vec3& a, const glm::vec3& b) noexcept;
     };
 }
