@@ -1,4 +1,4 @@
-#include "GPUBuffer.h"
+#include "GPUBuffer.hpp"
 #include <iostream>
 
 namespace Rendering
