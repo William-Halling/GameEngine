@@ -3,19 +3,22 @@
 
 
 Engine::Engine()
-	: m_Window(Core::Window::Desc{}), m_RenderSystem(m_Window)
 {
-	m_LastTime = std::chrono::steady_clock::now();
+    m_Window = std::make_unique<Core::Window>("Game", 1280, 720);
+    m_Window->Init(); // creates GL context
+    m_RenderSystem = std::make_unique<Rendering::RenderSystem>();
+    m_InputSystem  = std::make_unique<Core::InputSystem>();
+    m_JobSystem    = std::make_unique<Core::JobSystem>(std::thread::hardware_concurrency());
+    m_Lua          = std::make_unique<Scripting::LuaVM>();
+    m_Commands     = std::make_unique<Gameplay::CommandBuffer>();
 
-	m_NPCBlackboard = Game::NPC::NPCBlackboard{};
-	
-    m_NPCs.resize(64);
+    m_LastTime     = std::chrono::steady_clock::now();
+}
 
-    //m_Lua.LoadScript("scripts/npc.lua");
-    //RegisterNPCBindings(m_Lua.State());
 
-	for (auto& npc : m_NPCs)
-		npc.tuning = &m_NPCBlackboard;
+Engine::~Engine()
+{
+    Shutdown();
 }
 
 
@@ -31,34 +34,22 @@ void Engine::Render()
 
 void Engine::Run()
 {
-    using clock = std::chrono::steady_clock;
-
-    constexpr float fixedDt = 1.0f / 60.0f;
-    float accumulator = 0.0f;
-
-    auto prev = clock::now();
-
-    while (!m_Window.ShouldClose() && m_Running)
+    constexpr double targetDt = 1.0 / 60.0;
+    while (m_Running)
     {
-        auto now = clock::now();
-        float frameDt = std::chrono::duration<float>(now - prev).count();
-        prev = now;
+        auto now = std::chrono::steady_clock::now();
+        std::chrono::duration<double> elapsed = now - m_LastTime;
+        m_LastTime = now;
+        float dt = static_cast<float>(std::min(elapsed.count(), 0.25)); // clamp
 
-        accumulator += frameDt;
+        m_Window->PollEvents();
+        m_InputSystem->AdvanceFrame();
 
-        m_InputBuffers.BeginFrame();
-        m_Window.PollEvents();
-
-        m_InputSystem.Update(m_Window, m_InputBuffers, m_Commands);
-
-        while (accumulator >= fixedDt)
-        {
-            Update(fixedDt);
-            accumulator -= fixedDt;
-        }
-
+        Update(dt);
         Render();
-        m_Window.SwapBuffers();
+
+        if (m_Window->ShouldClose())
+            m_Running = false;
     }
 }
 
@@ -76,4 +67,20 @@ void Engine::Update(float dt)
     {
         Game::NPC::NPCSystem::UpdateSingle(span[i], m_Camera.position, dt);
     });
+}
+
+
+void Engine::Render()
+{
+    m_RenderSystem->BeginFrame();
+ 
+    m_RenderSystem->EndFrame();
+}
+
+void Engine::Shutdown()
+{
+    m_RenderSystem.reset();
+    m_JobSystem.reset();
+    m_InputSystem.reset();
+    m_Window.reset();
 }

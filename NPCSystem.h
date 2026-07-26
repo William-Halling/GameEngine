@@ -1,8 +1,8 @@
 #pragma once
+
 #include <span>
 #include <cstdint>
 #include <glm/glm.hpp>
-#include <lua.hpp>
 
 #include "NPC_SOA.hpp"
 
