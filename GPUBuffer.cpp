@@ -5,9 +5,14 @@ namespace Rendering
 {
     GPUBuffer::~GPUBuffer()
     {
-        if (m_IBO) glDeleteBuffers(1, &m_IBO);
-        if (m_VBO) glDeleteBuffers(1, &m_VBO);
-        if (m_VAO) glDeleteVertexArrays(1, &m_VAO);
+        if (m_IBO) 
+            glDeleteBuffers(1, &m_IBO);
+        
+        if (m_VBO) 
+            glDeleteBuffers(1, &m_VBO);
+        
+        if (m_VAO) 
+            glDeleteVertexArrays(1, &m_VAO);
     }
 
     void GPUBuffer::Upload(const void* vertexData, std::size_t vertexCount, std::size_t vertexStride, const std::vector<uint32_t>& indices)
