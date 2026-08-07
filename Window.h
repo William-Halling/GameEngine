@@ -32,20 +32,26 @@ namespace Core
             // Throws std::runtime_error on failure.
         void Init();
 
+
             // Poll OS events (call on main thread each frame).
         void PollEvents() noexcept;
+
 
             // Swap front/back buffers (call on main thread after rendering).
         void SwapBuffers() const noexcept;
 
+
             // Query whether the user requested close.
         [[nodiscard]] bool ShouldClose() const noexcept;
+
 
             // Native handle for advanced usage (do not destroy externally).
         [[nodiscard]] GLFWwindow* NativeHandle() const noexcept { return m_Handle; }
 
+
         [[nodiscard]] int Width()  const noexcept { return m_Width; }
         [[nodiscard]] int Height() const noexcept { return m_Height; }
+
 
         [[nodiscard]] float Aspect() const noexcept
         {
@@ -55,8 +61,10 @@ namespace Core
             // Resize callback: userData is forwarded as-is. Callback runs on main thread.
         using ResizeFn = void(*)(void* userData, int width, int height);
 
+
             // Set a resize callback; safe to call before or after Init.
         void SetResizeCallback(void* userData, ResizeFn fn) noexcept;
+
 
             // Enable or disable VSync at runtime (main thread).
         void SetVSync(bool enabled) noexcept;
@@ -65,9 +73,11 @@ namespace Core
             // GLFW framebuffer callback forwards to instance method.
         static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 
+
             // Internal helper to update stored width/height and call user callback.
         void OnFramebufferSize(int width, int height) noexcept;
 
+        
         GLFWwindow* m_Handle         = nullptr;
         int         m_Width          = 0;
         int         m_Height         = 0;
