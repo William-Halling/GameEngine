@@ -4,15 +4,33 @@
 
 Engine::Engine()
 {
-    m_Window = std::make_unique<Core::Window>("Game", 1280, 720);
-    m_Window->Init(); // creates GL context
+    Core::Window::Desc desc;
+    desc.width = 1280;
+    desc.height = 720;
+    desc.title = "Game";
+    desc.vsync = true;
+    desc.resizable = true;
+
+    m_Window = std::make_unique<Core::Window>(desc);
+    m_Window->Init();
+
+        // Load GL function pointers after context creation
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+        throw std::runtime_error("Failed to initialize GL loader");
+    }
+
+        // Create subsystems (RenderSystem must be after GL loader)
     m_RenderSystem = std::make_unique<Rendering::RenderSystem>();
     m_InputSystem  = std::make_unique<Core::InputSystem>();
-    m_JobSystem    = std::make_unique<Core::JobSystem>(std::thread::hardware_concurrency());
+    m_JobSystem    = std::make_unique<Core::JobSystem>(static_cast<std::uint32_t>(std::thread::hardware_concurrency()));
     m_Lua          = std::make_unique<Scripting::LuaVM>();
     m_Commands     = std::make_unique<Gameplay::CommandBuffer>();
 
-    m_LastTime     = std::chrono::steady_clock::now();
+    m_LastTime = std::chrono::steady_clock::now();
+
+        // Example: set window user pointer if needed for callbacks
+    glfwSetWindowUserPointer(m_Window->NativeHandle(), m_Window.get());
 }
 
 
@@ -25,7 +43,6 @@ Engine::~Engine()
 void Engine::Render()
 {
     m_RenderSystem.BeginFrame();
-
 
 
     m_RenderSystem.EndFrame();
@@ -46,7 +63,12 @@ void Engine::Run()
         m_InputSystem->AdvanceFrame();
 
         Update(dt);
-        Render();
+
+        m_RenderSystem->BeginFrame();
+        
+        m_RenderSystem->EndFrame();
+
+        m_Window->SwapBuffers();
 
         if (m_Window->ShouldClose())
             m_Running = false;
