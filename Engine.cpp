@@ -5,10 +5,10 @@
 Engine::Engine()
 {
     Core::Window::Desc desc;
-    desc.width = 1280;
+    desc.width  = 1280;
     desc.height = 720;
-    desc.title = "Game";
-    desc.vsync = true;
+    desc.title  = "Game";
+    desc.vsync  = true;
     desc.resizable = true;
 
     m_Window = std::make_unique<Core::Window>(desc);
@@ -52,11 +52,13 @@ void Engine::Render()
 void Engine::Run()
 {
     constexpr double targetDt = 1.0 / 60.0;
+
     while (m_Running)
     {
         auto now = std::chrono::steady_clock::now();
         std::chrono::duration<double> elapsed = now - m_LastTime;
         m_LastTime = now;
+    
         float dt = static_cast<float>(std::min(elapsed.count(), 0.25)); // clamp
 
         m_Window->PollEvents();

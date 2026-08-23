@@ -7,9 +7,9 @@ namespace Core
 {
 	class InputSystem
 	{
-	public:
-		InputSystem() = default;
+		public:
+			InputSystem() = default;
 
-		void Update(const Window& window, InputBuffers& buffers, Gameplay::CommandBuffer& commands) noexcept;
+			void Update(const Window& window, InputBuffers& buffers, Gameplay::CommandBuffer& commands) noexcept;
 	};
 }

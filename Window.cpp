@@ -1,7 +1,7 @@
-#include "Window.h"
 #include <glad/glad.h>
 #include <stdexcept>
 #include <iostream>
+#include "Window.h"
 
 namespace Core
 {
@@ -124,11 +124,7 @@ namespace Core
         m_Width = width;
         m_Height = height;
 
-        if (gladLoadGLLoader != nullptr)
-        {
-                // Update viewport
-            glViewport(0, 0, width, height);
-        }
+        glViewport(0, 0, width, height);
 
         if (m_ResizeCallback)
             m_ResizeCallback(m_ResizeUser, width, height);
