@@ -37,10 +37,10 @@ namespace Rendering
 
 			[[nodiscard]] GLsizei IndexCount() const noexcept { return m_IndexCount; }
 
-			/**
-			 * @brief Configure attribute layout for a vertex type T. Must be called before Upload.
-			 * @brief This is a convenience helper that sets up three attributes: position, normal, uv.
-			 */
+				/**
+				 * @brief Configure attribute layout for a vertex type T. Must be called before Upload.
+				 * @brief This is a convenience helper that sets up three attributes: position, normal, uv.
+				 */
 			template<typename VertexT>
 			static void ConfigureDefaultAttributes();
 		
